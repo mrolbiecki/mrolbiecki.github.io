@@ -4,6 +4,7 @@
   "version": "5.5.1",
   "scripts": {
     "dev": "astro dev",
+    "generate:brand": "tsx scripts/generate-brand.ts",
     "build": "astro check && astro build && pagefind --site dist && cp -r dist/pagefind public/",
     "preview": "astro preview",
     "sync": "astro sync",
@@ -36,6 +37,7 @@
     "eslint-plugin-astro": "^1.5.0",
     "globals": "^16.5.0",
     "pagefind": "^1.4.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0"
   }

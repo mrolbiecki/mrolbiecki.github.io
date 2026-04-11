@@ -3,6 +3,7 @@ import { SITE } from "@/config";
 import loadGoogleFonts from "../loadGoogleFont";
 
 export default async () => {
+  const letter = SITE.title.trim().charAt(0).toUpperCase() || "M";
   return satori(
     {
       type: "div",
@@ -19,20 +20,20 @@ export default async () => {
           type: "span",
           props: {
             style: {
-              fontSize: 84,
+              fontSize: 300,
               fontWeight: 600,
               color: "#000000",
             },
-            children: SITE.title,
+            children: letter,
           },
         },
       },
     },
     {
-      width: 1200,
-      height: 630,
+      width: 512,
+      height: 512,
       embedFont: true,
-      fonts: await loadGoogleFonts(SITE.title),
+      fonts: await loadGoogleFonts(letter),
     }
   );
 };
