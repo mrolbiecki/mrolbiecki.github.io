@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>◇ mrolbiecki.com — eventually, a website</title>
+<meta name="description" content="mrolbiecki.com is under construction. ◇ guarantees eventual delivery — no deadline given. Contact and CV are posted on the information board." />
+<meta property="og:title" content="◇ mrolbiecki.com — eventually, a website" />
+<meta property="og:description" content="Site under construction. The final block has been hanging from the crane for a while now." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://mrolbiecki.github.io/" />
+<meta property="og:image" content="https://mrolbiecki.github.io/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🚧%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --yellow: #f7c600;
+    --yellow-deep: #e0b000;
+    --ink: #17170f;
+    --orange: #e8622d;
+    --paper: #f4f2ec;
+    --led-bg: #211f18;
+    --led-on: #ffb03a;
+    --ground: #6e6550;
+    --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  body.mode-night { --ground: #38342a; }
+  body.mode-golden { --ground: #5c5140; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--mono);
+    color: var(--ink);
+    background: linear-gradient(#bfe0f2 0%, #e9f2f0 78%, #dfe6db 100%);
+    min-height: 100vh;
+  }
+  body.mode-golden { background: linear-gradient(#8f7bb8 0%, #f2a06b 62%, #f8d9a8 100%); }
+  body.mode-night  { background: linear-gradient(#0b1220 0%, #16233c 70%, #1d2b45 100%); }
+
+  #scene { position: fixed; inset: 0; }
+  #scene canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---- mode toggle ---- */
+  #modeToggle {
+    position: fixed; top: 14px; right: 14px; z-index: 30;
+    font-family: var(--mono); font-size: 13px;
+    background: var(--yellow); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 0;
+    padding: 6px 10px; cursor: pointer;
+    box-shadow: 3px 3px 0 rgba(0,0,0,.35);
+  }
+  #modeToggle:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 rgba(0,0,0,.35); }
+  #modeToggle:active { transform: translate(1px,1px); box-shadow: 2px 2px 0 rgba(0,0,0,.35); }
+  :focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+
+  /* ---- the board ---- */
+  #boardArea {
+    position: fixed; z-index: 20;
+    left: clamp(20px, 5.5vw, 96px);
+    bottom: max(7vh, 44px);
+    width: min(430px, calc(100vw - 40px));
+  }
+  /* board legs, planted in the ground */
+  #boardArea::before, #boardArea::after {
+    content: ""; position: absolute; z-index: -1;
+    bottom: -34px; width: 16px; height: 120px;
+    background: linear-gradient(90deg, #6e675a, #4f4a3f 55%, #423e35);
+  }
+  #boardArea::before { left: 11%; }
+  #boardArea::after  { right: 11%; }
+
+  .board {
+    position: relative;
+    background: var(--yellow);
+    border: 4px solid var(--ink);
+    box-shadow: 6px 8px 0 rgba(0,0,0,.28);
+    transform: rotate(-.4deg);
+    padding: 0 0 14px;
+  }
+  body.mode-night .board { box-shadow: 6px 8px 0 rgba(0,0,0,.55), 0 0 60px rgba(247,198,0,.14); }
+
+  .stripes {
+    height: 22px;
+    background-image: linear-gradient(-45deg,
+      var(--ink) 25%, var(--yellow) 25% 50%, var(--ink) 50% 75%, var(--yellow) 75%);
+    background-size: 44px 44px;
+    background-position: center top;
+    border-bottom: 4px solid var(--ink);
+  }
+
+  .board-inner { padding: 14px 18px 0; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+    display: flex; justify-content: space-between; gap: 8px;
+    text-transform: uppercase; opacity: .82;
+  }
+  .eyebrow .no { font-weight: 500; }
+
+  h1 {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(34px, 4.6vw, 46px);
+    line-height: .98; letter-spacing: .01em;
+    margin: 10px 0 2px;
+  }
+  h1 .dia { color: var(--orange); -webkit-text-stroke: 1.5px var(--ink); }
+  .tagline {
+    font-family: var(--display); font-weight: 600; font-size: 19px;
+    text-transform: uppercase; letter-spacing: .14em;
+    border-bottom: 3px solid var(--ink); padding-bottom: 12px;
+  }
+
+  .specs { font-size: 12.5px; line-height: 1.35; }
+  .specs .row {
+    display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 10px;
+    padding: 7px 0; border-bottom: 1.5px solid rgba(23,23,15,.35);
+    align-items: baseline;
+  }
+  .specs dd { min-width: 0; overflow-wrap: anywhere; }
+  @media (max-width: 400px) {
+    .specs .row { grid-template-columns: 92px minmax(0, 1fr); }
+  }
+  .specs dt {
+    font-family: var(--display); font-weight: 600; font-size: 13.5px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .specs dt small { display: block; font-family: var(--mono); font-size: 9px; font-weight: 400; letter-spacing: .04em; opacity: .65; text-transform: none; }
+  .specs dd a { color: var(--ink); text-decoration-thickness: 2px; text-underline-offset: 3px; font-weight: 500; }
+  .specs dd a:hover { background: var(--ink); color: var(--yellow); text-decoration: none; }
+  .specs dd a .ext { display: inline-block; text-decoration: none; }
+
+  .led {
+    margin: 12px 0 0; padding: 7px 10px;
+    background: var(--led-bg); color: var(--led-on);
+    font-size: 11.5px; letter-spacing: .1em;
+    display: flex; justify-content: space-between; gap: 8px;
+    border: 2px solid var(--ink);
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .led .blink { animation: ledblink 1.6s steps(1) infinite; }
+  @keyframes ledblink { 50% { opacity: .55; } }
+  @media (prefers-reduced-motion: reduce) { .led .blink { animation: none; } }
+
+  .note {
+    margin-top: 11px; font-size: 10.5px; line-height: 1.5; opacity: .85;
+  }
+  .sig {
+    margin-top: 9px; font-size: 10px; opacity: .72;
+    display: flex; justify-content: space-between; gap: 8px; align-items: baseline;
+  }
+  .sig .permit { white-space: nowrap; }
+  .sig a { color: inherit; }
+
+  .bolt {
+    position: absolute; width: 10px; height: 10px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #d8d3c4, #7a7462 65%, #55503f);
+    box-shadow: inset 0 0 0 1.5px rgba(23,23,15,.6);
+  }
+  .bolt.tl { top: 30px; left: 6px; } .bolt.tr { top: 30px; right: 6px; }
+  .bolt.bl { bottom: 6px; left: 6px; } .bolt.br { bottom: 6px; right: 6px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* ---- stacked layout: narrow or short screens ---- */
+  @media (max-width: 880px), (max-height: 660px) {
+    body { display: flex; flex-direction: column; }
+    #scene { position: relative; inset: auto; height: 46vh; min-height: 250px; flex: none; }
+    #boardArea {
+      position: relative; left: auto; bottom: auto;
+      width: auto; margin: 0; padding: 0 14px 40px;
+      background: var(--ground); flex: 1;
+    }
+    #boardArea::before, #boardArea::after { display: none; }
+    .board { max-width: 520px; margin: -26px auto 0; transform: none; }
+    #modeToggle { position: absolute; }
+    h1 { font-size: clamp(30px, 9vw, 42px); }
+  }
+</style>
+</head>
+<body class="mode-day">
+<noscript><style>.led, #modeToggle { display: none; }</style></noscript>
+
+<button id="modeToggle" type="button" aria-label="Toggle day and night">☾ night</button>
+
+<div id="scene" role="img" aria-label="A construction site. A tower crane has assembled a pixel-block wireframe of a web page and is holding the final block just above its slot, forever.">
+  <canvas id="c" aria-hidden="true"></canvas>
+</div>
+
+<main id="boardArea">
+  <section class="board" aria-label="Construction information board">
+    <span class="bolt tl"></span><span class="bolt tr"></span>
+    <span class="bolt bl"></span><span class="bolt br"></span>
+    <div class="stripes"></div>
+    <div class="board-inner">
+      <p class="eyebrow"><span lang="pl">Tablica informacyjna budowy</span> <span class="no">no.&nbsp;001</span></p>
+      <h1><span class="dia">◇</span>&nbsp;mrolbiecki.com</h1>
+      <p class="tagline">Eventually, a website</p>
+
+      <dl class="specs">
+        <div class="row">
+          <dt>Project <small lang="pl">budowa</small></dt>
+          <dd>Personal website &amp; blog. Foundations poured, content pending.</dd>
+        </div>
+        <div class="row">
+          <dt>Developer <small lang="pl">inwestor</small></dt>
+          <dd>Marcin Rolbiecki</dd>
+        </div>
+        <div class="row">
+          <dt>Contractor <small lang="pl">wykonawca</small></dt>
+          <dd>Claude Fable — AI, sole contractor. No subcontractors.</dd>
+        </div>
+        <div class="row">
+          <dt>Blueprints <small lang="pl">projekt</small></dt>
+          <dd><a href="https://github.com/mrolbiecki/resume/blob/main/resume.pdf">résumé.pdf<span class="ext">&nbsp;↗</span></a></dd>
+        </div>
+        <div class="row">
+          <dt>Site contact <small lang="pl">kontakt</small></dt>
+          <dd><a href="mailto:rolbieckidev@gmail.com">rolbieckidev@gmail.com</a></dd>
+        </div>
+        <div class="row">
+          <dt>Completion <small lang="pl">termin</small></dt>
+          <dd>◇ — guaranteed, undated.*</dd>
+        </div>
+      </dl>
+
+      <p class="led" aria-hidden="true">
+        <span>BLOCKS <span id="ledCount">000/000</span></span>
+        <span>CRANE <span id="ledCrane">BUSY</span></span>
+        <span class="blink">ETA ◇</span>
+      </p>
+      <p class="sr-only" id="ledStatus">Construction progress: all blocks placed except the final one.</p>
+
+      <p class="note">* ◇φ — “eventually φ”, linear temporal logic. ◇(website) is a
+      liveness property: the site is guaranteed to exist at <em>some</em> future state,
+      which conveniently names no particular one. The final block has been hanging
+      from the crane for a while now.</p>
+
+      <p class="sig">
+        <span>Erected &amp; operated by <a href="https://claude.com/claude-code">Claude&nbsp;Fable</a>, an&nbsp;AI · 2026</span>
+        <span class="permit">PW-1/2026</span>
+      </p>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ---------- mode (time of day) ---------- */
+  const body = document.body;
+  const toggle = document.getElementById("modeToggle");
+  const autoMode = () => {
+    const h = new Date().getHours();
+    if (h >= 21 || h < 5) return "night";
+    if (h < 7 || h >= 19) return "golden";
+    return "day";
+  };
+  let mode = autoMode();
+  const applyMode = () => {
+    body.className = "mode-" + mode;
+    toggle.textContent = mode === "night" ? "☀ day" : "☾ night";
+  };
+  toggle.addEventListener("click", () => {
+    mode = mode === "night" ? "day" : "night";
+    applyMode();
+    if (reduceMotion) render(1.2);
+  });
+  applyMode();
+
+  const PAL = {
+    day:    { star: 0,   cloud: "rgba(255,255,255,.85)", sun: "#ffe9a3", groundTop: "#9a8f74", groundBot: "#6e6550", ghost: "rgba(30,50,70,.14)", pane: "rgba(255,255,255,.34)", cable: "rgba(35,33,26,.8)",    dim: 1 },
+    golden: { star: .25, cloud: "rgba(255,226,190,.75)", sun: "#ff9d4d", groundTop: "#94805a", groundBot: "#635342", ghost: "rgba(40,30,60,.16)", pane: "rgba(255,240,220,.24)", cable: "rgba(45,38,30,.85)",   dim: .93 },
+    night:  { star: 1,   cloud: "rgba(160,180,210,.16)", sun: "#e8ecf4", groundTop: "#565040", groundBot: "#38342a", ghost: "rgba(200,220,255,.13)", pane: "rgba(14,26,48,.55)",  cable: "rgba(205,214,228,.7)", dim: .78 },
+  };
+
+  /* ---------- canvas setup ---------- */
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, dpr = 1;
+
+  const resize = () => {
+    const r = canvas.parentElement.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.max(1, Math.round(r.width));
+    H = Math.max(1, Math.round(r.height));
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layout();
+    if (reduceMotion) { seedStatic(); render(1.2); }
+  };
+
+  /* ---------- blueprint: a pixel wireframe of the future site ---------- */
+  const BW = 24, BH = 16;               // blueprint grid, cells
+  const COLORS = {
+    frame: "#2b2a24", sep: "#2b2a24", dot: "#e8622d", title: "#e8622d",
+    text: "#8d8778", img: "#5d7f9e", final: "#f7c600",
+  };
+  const cells = [];
+  const put = (x, y, c) => cells.push({ x, y, c });
+  for (let x = 0; x < BW; x++) { put(x, 0, COLORS.frame); put(x, BH - 1, COLORS.frame); }
+  for (let y = 1; y < BH - 1; y++) { put(0, y, COLORS.frame); put(BW - 1, y, COLORS.frame); }
+  for (let x = 1; x < BW - 1; x++) put(x, 2, COLORS.sep);          // header rule
+  put(4, 1, COLORS.dot); put(6, 1, COLORS.dot);                     // nav dots
+  for (let x = 3; x <= 12; x++) put(x, 5, COLORS.title);            // hero headline
+  for (let y = 5; y <= 8; y++) for (let x = 16; x <= 21; x++) put(x, y, COLORS.img); // image
+  for (let x = 3; x <= 13; x++) put(x, 10, COLORS.text);            // text line 1
+  for (let x = 3; x <= 20; x++) put(x, 12, COLORS.text);            // text line 2
+  // build order: bottom row up, right to left (crane stands on the right)
+  cells.sort((a, b) => (b.y - a.y) || (b.x - a.x));
+  const FINAL = { x: 2, y: 1, c: COLORS.final };                    // the favicon. eventually.
+  cells.push(FINAL);
+  const TOTAL = cells.length;
+
+  /* ---------- progress persists between visits ---------- */
+  const LS_KEY = "mrolbiecki-construction-progress";
+  let placed;
+  try { placed = parseInt(localStorage.getItem(LS_KEY), 10) || 0; } catch (e) { placed = 0; }
+  placed = Math.max(placed, Math.floor(TOTAL * 0.88));
+  placed = Math.min(placed, TOTAL - 1);                             // never all of them
+  const save = () => { try { localStorage.setItem(LS_KEY, String(placed)); } catch (e) {} };
+
+  const ledCount = document.getElementById("ledCount");
+  const ledCrane = document.getElementById("ledCrane");
+  const pad = n => String(n).padStart(3, "0");
+  let ledCache = "";
+  const updateLed = (t = 0) => {
+    const count = pad(placed) + "/" + pad(TOTAL);
+    const crane =
+      cr.attemptStart > 0 ? "SO CLOSE" :
+      t < cr.boostUntil   ? "OVERTIME" :
+      placed >= TOTAL - 1 ? "HOLDING" : "BUSY";
+    if (ledCache !== count + crane) {
+      ledCache = count + crane;
+      ledCount.textContent = count;
+      ledCrane.textContent = crane;
+    }
+  };
+
+  /* ---------- scene geometry ---------- */
+  let s, bx, by, groundY, craneX, mastTop, jibY, jibL, jibR, pileX;
+  function layout() {
+    groundY = H - Math.max(44, H * 0.1);
+    // must match the CSS stacked-layout media query
+    const narrow = matchMedia("(max-width: 880px), (max-height: 660px)").matches;
+    // full rig spans jibL..jibR = 34 cells: 1.5 overhang + 24 building + 4.5 gap + 4 counterjib
+    // on wide layouts, leave room for the fixed board (offset + width) so it never hides the site
+    const boardEdge = Math.min(Math.max(20, W * 0.055), 96) + 454;
+    const avail = narrow ? W * 0.88 : W - boardEdge - 40;
+    // (groundY - 10) / 24.2 keeps the mast tip and beacon inside the sky
+    s = Math.max(5, Math.min(avail / 34, (groundY * 0.66) / BH, (groundY - 10) / 24.2, 18));
+    const sceneW = 34 * s;
+    const left = narrow ? (W - sceneW) / 2 + 1.5 * s : Math.max(boardEdge + 20, W - sceneW - 20) + 1.5 * s;
+    bx = Math.max(1.5 * s + 4, left);
+    by = groundY - BH * s;
+    craneX = bx + BW * s + 4.5 * s;
+    mastTop = by - 5 * s;
+    jibY = mastTop + 0.6 * s;
+    jibL = bx - 1.5 * s;
+    jibR = craneX + 4 * s;
+    pileX = craneX - 2.4 * s;
+  }
+
+  /* ---------- deterministic stars & clouds ---------- */
+  const rnd = (seed => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296)(20260705);
+  const stars = Array.from({ length: 70 }, () => ({ x: rnd(), y: rnd() * 0.7, tw: rnd() * 6.28, r: rnd() < 0.2 ? 1.6 : 1 }));
+  const clouds = Array.from({ length: 4 }, (_, i) => ({ x: rnd(), y: 0.08 + rnd() * 0.3, w: 70 + rnd() * 90, v: 4 + rnd() * 5, i }));
+
+  /* ---------- crane state machine ---------- */
+  // phases: toPile, down(grab), up, toSlot, lower, place, raise — then repeat
+  const cr = {
+    phase: "toPile",
+    trolleyX: 0, hookY: 0, carrying: false,
+    target: null, boostUntil: -1, attemptStart: -1,
+  };
+  const cellPX = c => ({ x: bx + c.x * s, y: by + c.y * s });
+  const TROLLEY_V = 34;  // cells per second
+  const HOOK_V = 48;
+  const restY = () => mastTop + 2 * s;
+
+  // static tableau for reduced motion: final block held just above its slot
+  function seedStatic() {
+    placed = TOTAL - 1;
+    const fp = cellPX(FINAL);
+    cr.trolleyX = fp.x + s / 2;
+    cr.hookY = fp.y - 2.4 * s;
+    cr.carrying = true;
+  }
+
+  function stepCrane(dt, t) {
+    const next = cells[placed];
+    const isFinal = placed >= TOTAL - 1;
+    cr.target = next;
+    const tp = cellPX(next);
+    const slotX = tp.x + s / 2, slotY = tp.y;
+    const boost = t < cr.boostUntil ? 2.5 : 1;
+    const moveTo = (cur, goal, v) => {
+      const d = goal - cur;
+      const step = v * boost * s * dt;
+      return Math.abs(d) <= step ? goal : cur + Math.sign(d) * step;
+    };
+    switch (cr.phase) {
+      case "toPile":
+        cr.trolleyX = moveTo(cr.trolleyX, pileX, TROLLEY_V);
+        cr.hookY = moveTo(cr.hookY, restY(), HOOK_V);
+        if (cr.trolleyX === pileX && cr.hookY === restY()) cr.phase = "down";
+        break;
+      case "down":
+        cr.hookY = moveTo(cr.hookY, groundY - 2.6 * s, HOOK_V);
+        if (cr.hookY === groundY - 2.6 * s) { cr.carrying = true; cr.phase = "up"; }
+        break;
+      case "up":
+        cr.hookY = moveTo(cr.hookY, restY(), HOOK_V);
+        if (cr.hookY === restY()) cr.phase = "toSlot";
+        break;
+      case "toSlot":
+        cr.trolleyX = moveTo(cr.trolleyX, slotX, TROLLEY_V);
+        if (cr.trolleyX === slotX) cr.phase = "lower";
+        break;
+      case "lower": {
+        // the final block stops short of its slot, forever
+        let stop;
+        if (isFinal) {
+          const a = t - cr.attemptStart;
+          if (cr.attemptStart > 0 && a < 3.2) {
+            // an attempt: descend to a hair above the slot, tremble, give up
+            let gap;
+            if (a < 1.2)      gap = 2.4 - 2.22 * (a / 1.2) * (2 - a / 1.2); // ease out
+            else if (a < 2)   gap = 0.18 + Math.abs(Math.sin(a * 26)) * 0.05;
+            else              gap = 0.18 + 2.22 * ((a - 2) / 1.2);
+            stop = slotY - gap * s;
+            cr.hookY = moveTo(cr.hookY, stop, HOOK_V);
+          } else {
+            cr.attemptStart = -1;
+            stop = slotY - 2.4 * s + Math.sin(t * 1.1) * 0.35 * s;
+            cr.hookY = moveTo(cr.hookY, stop, HOOK_V * 0.12);
+          }
+        } else {
+          stop = slotY - s;
+          cr.hookY = moveTo(cr.hookY, stop, HOOK_V);
+          if (cr.hookY === stop) {
+            cr.carrying = false;
+            placed++; save();
+            cr.phase = "raise";
+          }
+        }
+        break;
+      }
+      case "raise":
+        cr.hookY = moveTo(cr.hookY, restY(), HOOK_V);
+        if (cr.hookY === restY()) cr.phase = "toPile";
+        break;
+    }
+    cr.trolleyX = Math.max(jibL + s, Math.min(jibR - 5 * s, cr.trolleyX));
+  }
+
+  /* ---------- drawing ---------- */
+  const shade = (hex, f) => {
+    const n = parseInt(hex.slice(1), 16);
+    const ch = i => Math.max(0, Math.min(255, Math.round(((n >> i) & 255) * f)));
+    return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+  };
+
+  function block(x, y, size, color, dim) {
+    ctx.fillStyle = shade(color, dim);
+    ctx.fillRect(x, y, size, size);
+    ctx.fillStyle = "rgba(255,255,255,.16)";
+    ctx.fillRect(x, y, size, Math.max(1, size * 0.18));
+    ctx.fillStyle = "rgba(0,0,0,.22)";
+    ctx.fillRect(x, y + size - Math.max(1, size * 0.18), size, Math.max(1, size * 0.18));
+  }
+
+  function render(t) {
+    const p = PAL[mode] || PAL.day;
+    ctx.clearRect(0, 0, W, H);
+
+    // stars
+    if (p.star > 0) {
+      ctx.fillStyle = "#dce6f5";
+      for (const st of stars) {
+        const a = p.star * (0.35 + 0.65 * Math.abs(Math.sin(t * 0.7 + st.tw)));
+        ctx.globalAlpha = a;
+        ctx.fillRect(st.x * W, st.y * H, st.r, st.r);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // sun / moon
+    const cx = W * 0.82, cy = H * 0.16, r = Math.max(18, s * 2.2);
+    ctx.fillStyle = p.sun;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+    if (mode === "night") {                       // crescent: erase the bite so the sky shows through
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath(); ctx.arc(cx - r * 0.42, cy - r * 0.18, r * 0.86, 0, 7);
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+    } else {
+      ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(cx, cy, r * 1.5, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+    }
+
+    // clouds
+    ctx.fillStyle = p.cloud;
+    for (const cl of clouds) {
+      const x = ((cl.x + (reduceMotion ? 0 : t * cl.v / 1000)) % 1.2 - 0.1) * W;
+      const y = cl.y * H;
+      ctx.fillRect(x, y, cl.w, 14);
+      ctx.fillRect(x + cl.w * 0.18, y - 10, cl.w * 0.55, 12);
+      ctx.fillRect(x + cl.w * 0.32, y + 12, cl.w * 0.45, 8);
+    }
+
+    // ground
+    const grd = ctx.createLinearGradient(0, groundY, 0, H);
+    grd.addColorStop(0, p.groundTop); grd.addColorStop(1, p.groundBot);
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.fillStyle = "rgba(0,0,0,.18)";
+    ctx.fillRect(0, groundY, W, 3);
+    // rubble specks
+    ctx.fillStyle = "rgba(0,0,0,.09)";
+    for (const st of stars) {
+      const gx = ((st.x * 3.7) % 1) * W, gy = groundY + 8 + ((st.y * 5.3) % 1) * (H - groundY - 14);
+      ctx.fillRect(gx, gy, 2 + st.r, 2);
+    }
+
+    // glass pane behind the wireframe interior
+    ctx.fillStyle = p.pane;
+    ctx.fillRect(bx + s, by + s, (BW - 2) * s, (BH - 2) * s);
+
+    // blueprint ghost (the plan)
+    ctx.strokeStyle = p.ghost;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeRect(bx - 0.5, by - 0.5, BW * s + 1, BH * s + 1);
+    ctx.setLineDash([]);
+    for (let i = placed; i < TOTAL; i++) {
+      const c = cells[i], px = cellPX(c);
+      ctx.fillStyle = p.ghost;
+      ctx.fillRect(px.x + s * 0.3, px.y + s * 0.3, s * 0.4, s * 0.4);
+    }
+
+    // placed blocks
+    for (let i = 0; i < placed; i++) {
+      const c = cells[i], px = cellPX(c);
+      block(px.x, px.y, s, c.c, p.dim);
+    }
+    // the final slot, blinking
+    const fp = cellPX(FINAL);
+    ctx.strokeStyle = `rgba(247,198,0,${0.35 + 0.45 * Math.abs(Math.sin(t * 2))})`;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 2]);
+    ctx.strokeRect(fp.x + 1, fp.y + 1, s - 2, s - 2);
+    ctx.setLineDash([]);
+
+    /* ---- crane ---- */
+    const oc = "#e8622d", od = shade(oc, 0.72);
+    const mw = s * 0.9;
+    // mast
+    ctx.fillStyle = shade("#d8d3c4", p.dim);
+    ctx.fillRect(craneX - mw / 2, mastTop, mw, groundY - mastTop);
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+    for (let y = mastTop + s; y < groundY - s; y += s * 1.2)
+      ctx.fillRect(craneX - mw / 2 + 1, y, mw - 2, 2);
+    // base
+    ctx.fillStyle = shade("#6e6550", p.dim);
+    ctx.fillRect(craneX - s * 1.6, groundY - s * 0.5, s * 3.2, s * 0.5);
+    // jib + counterjib
+    ctx.fillStyle = shade(oc, p.dim);
+    ctx.fillRect(jibL, jibY, jibR - jibL, s * 0.5);
+    ctx.fillStyle = shade(od, p.dim);
+    for (let x = jibL + s; x < jibR - s; x += s * 1.4)
+      ctx.fillRect(x, jibY + s * 0.5, 2, s * 0.35);
+    // apex + tie bars
+    ctx.strokeStyle = shade(od, p.dim); ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(jibL + s, jibY); ctx.lineTo(craneX, mastTop - 2.6 * s); ctx.lineTo(jibR - s, jibY);
+    ctx.stroke();
+    ctx.fillStyle = shade(oc, p.dim);
+    ctx.fillRect(craneX - 2, mastTop - 2.8 * s, 4, 2.8 * s);
+    // counterweight
+    ctx.fillStyle = shade("#55503f", p.dim);
+    ctx.fillRect(jibR - 2.6 * s, jibY + s * 0.5, s * 1.8, s * 1.1);
+    // cab
+    ctx.fillStyle = shade(oc, p.dim);
+    ctx.fillRect(craneX - mw, jibY + s * 0.4, mw * 1.6, s * 1.1);
+    ctx.fillStyle = "rgba(210,235,255," + (mode === "night" ? ".9" : ".55") + ")";
+    ctx.fillRect(craneX - mw + 2, jibY + s * 0.55, mw * 0.7, s * 0.5);
+    // beacon
+    if (mode === "night") {
+      ctx.fillStyle = Math.sin(t * 3) > 0 ? "#ff3b30" : "rgba(255,59,48,.25)";
+      ctx.fillRect(craneX - 2, mastTop - 3.2 * s, 4, 4);
+    }
+
+    // trolley, cable, hook
+    const sway = cr.carrying ? Math.sin(t * 1.7) * s * 0.28 : 0;
+    ctx.fillStyle = shade("#2b2a24", Math.max(p.dim, 0.9));
+    ctx.fillRect(cr.trolleyX - s * 0.5, jibY + s * 0.5, s, s * 0.4);
+    ctx.strokeStyle = p.cable;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cr.trolleyX, jibY + s * 0.9);
+    ctx.lineTo(cr.trolleyX + sway, cr.hookY);
+    ctx.stroke();
+    ctx.fillStyle = mode === "night" ? "rgba(205,214,228,.85)" : shade("#2b2a24", 0.9);
+    ctx.fillRect(cr.trolleyX + sway - 3, cr.hookY, 6, 5);
+    if (cr.carrying) {
+      const bc = cells[Math.min(placed, TOTAL - 1)].c;
+      block(cr.trolleyX + sway - s / 2, cr.hookY + 5, s, bc, p.dim);
+    }
+
+    // block pile at the crane's feet
+    for (let i = 0; i < 3; i++)
+      block(pileX - s / 2 - (i % 2) * s * 0.7, groundY - s * (1 + Math.floor(i / 2)) - 1, s, "#8d8778", p.dim);
+
+    // traffic cones
+    const cone = x => {
+      ctx.fillStyle = shade("#e8622d", p.dim);
+      ctx.fillRect(x - s * 0.45, groundY - s * 0.22, s * 0.9, s * 0.22);
+      ctx.fillRect(x - s * 0.22, groundY - s * 0.75, s * 0.44, s * 0.55);
+      ctx.fillRect(x - s * 0.13, groundY - s * 1.05, s * 0.26, s * 0.32);
+      ctx.fillStyle = "rgba(255,255,255," + (mode === "night" ? ".85" : ".9") + ")";
+      ctx.fillRect(x - s * 0.22, groundY - s * 0.62, s * 0.44, s * 0.16);
+    };
+    if (bx - 2.2 * s > s) cone(bx - 2.2 * s);
+    cone(bx + BW * s * 0.42);
+  }
+
+  /* ---------- main loop ---------- */
+  const perf = () => performance.now() / 1000;
+  let last = perf();
+  function frame() {
+    if (Math.min(window.devicePixelRatio || 1, 2) !== dpr) resize();
+    const t = perf();
+    const dt = Math.min(t - last, 0.05);
+    last = t;
+    stepCrane(dt, t);
+    updateLed(t);
+    render(t);
+    requestAnimationFrame(frame);
+  }
+
+  // a click is a foreman's whistle: overtime during the build,
+  // one more heartbreaking attempt once only the final block remains
+  canvas.addEventListener("click", () => {
+    if (reduceMotion) return;
+    const t = perf();
+    if (placed >= TOTAL - 1) {
+      if (cr.phase === "lower" && cr.attemptStart < 0) cr.attemptStart = t;
+    } else {
+      cr.boostUntil = t + 4;
+    }
+  });
+  canvas.style.cursor = "pointer";
+
+  window.addEventListener("resize", resize);
+  resize();
+  updateLed();
+
+  if (reduceMotion) {
+    updateLed();
+    render(1.2);
+  } else {
+    // seed the crane at the pile
+    cr.trolleyX = pileX;
+    cr.hookY = restY();
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
